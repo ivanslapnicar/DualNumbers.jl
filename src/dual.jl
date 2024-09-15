@@ -1,9 +1,21 @@
-const ReComp = Union{Real,Complex}
+const ReComp = Union{Real,Complex,Quaternion,RBiQuaternion}
 
 struct Dual{T<:ReComp} <: Number
     value::T
     epsilon::T
 end
+
+function Base.rand(rng::AbstractRNG, ::Random.SamplerType{Dual{T}}) where {T<:ReComp}
+    Dual{T}(rand(rng, T), rand(rng, T))
+end
+
+function Base.randn(rng::AbstractRNG, ::Type{Dual{T}}) where {T<:ReComp}
+    Dual{T}(
+        randn(rng, T) / 2,
+        randn(rng, T) / 2
+    )
+end
+
 Dual(x::S, y::T) where {S<:ReComp,T<:ReComp} = Dual(promote(x,y)...)
 Dual(x::ReComp) = Dual(x, zero(x))
 Dual{T}(x::ReComp) where T<:ReComp = Dual{T}(T(x), zero(T))
@@ -152,7 +164,7 @@ function printtimes(io::IO, x::Real)
     end
 end
 
-Base.show(io::IO, z::Dual) = dual_show(io, z, get(IOContext(io), :compact, false))
+# Base.show(io::IO, z::Dual) = dual_show(io, z, get(IOContext(io), :compact, false))
 
 function Base.read(s::IO, ::Type{Dual{T}}) where T<:ReComp
     x = read(s, T)
