@@ -1,6 +1,6 @@
 module DualNumbers
 
-using SpecialFunctions, Random, Quaternions, RBiQuaternions
+using Quaternions, Random, RBiQuaternions, SpecialFunctions
 import NaNMath
 import Calculus
 
