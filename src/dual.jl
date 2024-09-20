@@ -213,7 +213,7 @@ for op in (:real, :imag, :float, :complex) # removed :conj
 end
 
 # same as conj dual below
-conj(z::Dual) = Dual(value(z),-epsilon(z))
+Base.conj(z::Dual) = Dual(value(z),-epsilon(z))
 
 
 Base.abs(z::Dual) = sqrt(abs2(z))
