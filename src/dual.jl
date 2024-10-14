@@ -261,7 +261,7 @@ Base.:*(x::Dual, z::Bool) = z*x
 
 Base.:*(z::Dual, w::Dual) = Dual(value(z)*value(w), epsilon(z)*value(w)+value(z)*epsilon(w))
 Base.:*(x::Number, z::Dual) = Dual(x*value(z), x*epsilon(z))
-Base.:*(z::Dual, x::Number) = Dual(x*value(z), x*epsilon(z))
+Base.:*(z::Dual, x::Number) = Dual(value(z)*x, epsilon(z)*x)
 
 Base.:/(z::Dual, w::Dual) = Dual(value(z)/value(w), (epsilon(z)*value(w)-value(z)*epsilon(w))/(value(w)*value(w)))
 Base.:/(z::Number, w::Dual) = Dual(z/value(w), -z*epsilon(w)/value(w)^2)
