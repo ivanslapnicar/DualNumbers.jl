@@ -256,8 +256,10 @@ Base.:-(z::Number, w::Dual) = Dual(z-value(w), -epsilon(w))
 Base.:-(z::Dual, w::Number) = Dual(value(z)-w, epsilon(z))
 
 # avoid ambiguous definition with Bool*Number
-Base.:*(x::Bool, z::Dual) = ifelse(x, z, ifelse(signbit(real(value(z)))==0, zero(z), -zero(z)))
-Base.:*(x::Dual, z::Bool) = z*x
+# Base.:*(x::Bool, z::Dual) = ifelse(x, z, ifelse(signbit(real(value(z)))==0, zero(z), -zero(z)))
+# Base.:*(x::Dual, z::Bool) = z*x
+Base.:*(x::Bool, z::Dual)=Dual(x*z.value,x*z.epsilon)
+Base.:*(z::Dual, x::Bool)=Dual(z.value*x,z.epsilon*x)
 
 Base.:*(z::Dual, w::Dual) = Dual(value(z)*value(w), epsilon(z)*value(w)+value(z)*epsilon(w))
 Base.:*(x::Number, z::Dual) = Dual(x*value(z), x*epsilon(z))
