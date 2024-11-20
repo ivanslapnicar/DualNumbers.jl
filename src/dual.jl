@@ -195,6 +195,12 @@ Base.isless(z::Real,w::Dual{<:Real}) = z < value(w)
 Base.isless(z::Dual{<:Real},w::Real) = value(z) < w
 # Added
 Base.isless(x::Dual{T}, y::Dual{T}) where T =isless(norm(realpart(x)),norm(realpart(y)))
+function Base.sqrt(a::Dual{T}) where T
+	c=sqrt(a.value)
+	d=a.epsilon==0 ? a.epsilon : sylvester(c,c,-a.epsilon)
+	Dual(c,d)
+end
+Base.eps(::Dual{T}) where T=eps(T)
 
 Base.hash(z::Dual) = (x = hash(value(z)); epsilon(z)==0 ? x : bitmix(x,hash(epsilon(z))))
 
