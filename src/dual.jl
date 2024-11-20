@@ -193,6 +193,8 @@ Base.isequal(x::Number, z::Dual) = isequal(z, x)
 Base.isless(z::Dual{<:Real},w::Dual{<:Real}) = value(z) < value(w)
 Base.isless(z::Real,w::Dual{<:Real}) = z < value(w)
 Base.isless(z::Dual{<:Real},w::Real) = value(z) < w
+# Added
+Base.isless(x::Dual{T}, y::Dual{T}) where T =isless(norm(realpart(x)),norm(realpart(y)))
 
 Base.hash(z::Dual) = (x = hash(value(z)); epsilon(z)==0 ? x : bitmix(x,hash(epsilon(z))))
 
