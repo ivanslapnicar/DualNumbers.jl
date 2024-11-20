@@ -1,5 +1,3 @@
-using LinearAlgebra
-
 const ReComp = Union{Real,Complex,Quaternion,RBiQuaternion}
 
 struct Dual{T<:ReComp} <: Number
