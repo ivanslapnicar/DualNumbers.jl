@@ -201,6 +201,7 @@ function Base.sqrt(a::Dual{T}) where T
 	Dual(c,d)
 end
 Base.eps(::Dual{T}) where T=eps(T)
+LinearAlgebra.norm(x::Dual{T}) where T = Dual(norm(realpart(x)),norm(dualpart(x)))
 
 Base.hash(z::Dual) = (x = hash(value(z)); epsilon(z)==0 ? x : bitmix(x,hash(epsilon(z))))
 
