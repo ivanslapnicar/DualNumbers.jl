@@ -190,10 +190,11 @@ Base.isequal(z::Dual, w::Dual) = isequal(value(z),value(w)) && isequal(epsilon(z
 Base.isequal(z::Dual, x::Number) = isequal(value(z), x) && isequal(epsilon(z), zero(x))
 Base.isequal(x::Number, z::Dual) = isequal(z, x)
 
-Base.isless(z::Dual{T},w::Dual{T}) where T<:Real= value(z) < value(w)
-Base.isless(z::T,w::Dual{T}) where T<:Real= z < value(w)
-Base.isless(z::Dual{T},w::T) where T<:Real = value(z) < w
-
+Base.isless(z::Dual{<:Real},w::Dual{<:Real}) = value(z) < value(w)
+Base.isless(z::Real,w::Dual{<:Real}) = z < value(w)
+Base.isless(z::Dual{<:Real},w::Real) = value(z) < w
+# Added
+Base.isless(x::Dual{T}, y::Dual{T}) where T =isless(norm(realpart(x)),norm(realpart(y)))
 function Base.sqrt(a::Dual{T}) where T
 	c=sqrt(a.value)
 	d=a.epsilon==0 ? a.epsilon : sylvester(c,c,-a.epsilon)
