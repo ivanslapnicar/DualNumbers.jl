@@ -224,7 +224,7 @@ end
 # Base.conj(z::Dual) = Dual(value(z),-epsilon(z))
 
 
-Base.abs(z::Dual) = sqrt(abs2(z))
+Base.abs(z::Dual) = z.value==0 ? Dual(0,abs(z.epsilon)) : sqrt(abs2(z)) 
 Base.abs2(z::Dual) = real(conj(z)*z)
 
 Base.real(z::Dual{<:Real}) = z
