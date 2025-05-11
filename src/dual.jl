@@ -216,12 +216,9 @@ Base.ceil( ::Type{T}, z::Dual) where {T<:Real} = ceil( T, value(z))
 Base.trunc(::Type{T}, z::Dual) where {T<:Real} = trunc(T, value(z))
 Base.round(::Type{T}, z::Dual) where {T<:Real} = round(T, value(z))
 
-for op in (:real, :imag, :float, :complex, :conj) # removed :conj
+for op in (:real, :imag, :float, :complex, :conj)
     @eval Base.$op(z::Dual) = Dual($op(value(z)), $op(epsilon(z)))
 end
-
-# same as conj dual below
-# Base.conj(z::Dual) = Dual(value(z),-epsilon(z))
 
 
 Base.abs(z::Dual) = z.value==0 ? Dual(0,abs(z.epsilon)) : sqrt(abs2(z)) 
