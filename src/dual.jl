@@ -202,6 +202,8 @@ function Base.sqrt(a::Dual{T}) where T
 end
 Base.eps(::Dual{T}) where T=eps(T)
 
+Base.isinteger(z::Dual) = isinteger(value(z)) # Ignore epsilon part to be consistent with ==
+
 Base.hash(z::Dual) = (x = hash(value(z)); epsilon(z)==0 ? x : bitmix(x,hash(epsilon(z))))
 
 Base.float(z::Union{Dual{T}, Dual{Complex{T}}}) where {T<:AbstractFloat} = z
