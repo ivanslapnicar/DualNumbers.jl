@@ -1,4 +1,4 @@
-const ReComp = Union{Real,Complex,Quaternion,RBiQuaternion}
+const ReComp = Number # Union{Real,Complex,Quaternion,RBiQuaternion}
 
 struct Dual{T<:ReComp} <: Number
     value::T
@@ -216,7 +216,7 @@ Base.ceil( ::Type{T}, z::Dual) where {T<:Real} = ceil( T, value(z))
 Base.trunc(::Type{T}, z::Dual) where {T<:Real} = trunc(T, value(z))
 Base.round(::Type{T}, z::Dual) where {T<:Real} = round(T, value(z))
 
-for op in (:real, :imag, :float, :complex, :conj)
+for op in (:real, :imag, :conj, :float, :complex)
     @eval Base.$op(z::Dual) = Dual($op(value(z)), $op(epsilon(z)))
 end
 
