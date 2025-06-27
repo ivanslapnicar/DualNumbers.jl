@@ -1,4 +1,4 @@
-const ReComp = Number # Union{Real,Complex,Quaternion,RBiQuaternion}
+const ReComp = Union{Real,Complex,Quaternion,RBiQuaternion}
 
 struct Dual{T<:ReComp} <: Number
     value::T
