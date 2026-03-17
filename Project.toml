@@ -5,11 +5,15 @@ version = "0.6.9"
 [deps]
 Calculus = "49dc2e85-a5d0-5ad3-a950-438e2897f1b9"
 NaNMath = "77ba4419-2d1f-58cd-9bb1-8ffee604a2e3"
+Quaternions = "94ee1d12-ae83-5a48-8b1c-48b8ff168ae0"
+RBiQuaternions = "be7923c8-3e70-447d-8860-ce9fd1d8f58a"
 SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
 
 [compat]
 Calculus = "0.5"
 NaNMath = "0.3, 1"
+Quaternions = "0.7.7"
+RBiQuaternions = "0.1.0"
 SpecialFunctions = "0.7, 0.8, 0.9, 0.10, 1.0, 2"
 julia = "0.7, 1.0"
 
