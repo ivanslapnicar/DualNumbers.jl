@@ -223,8 +223,8 @@ for op in (:real, :imag, :conj, :float, :complex)
 end
 
 
-Base.abs(z::Dual) = z.value==0 ? Dual(0,abs(z.epsilon)) : sqrt(abs2(z)) 
-Base.abs2(z::Dual) = real(conj(z)*z)
+Base.abs(z::Dual) = z.value==0 ? Dual(0,abs(z.epsilon)) : abs(z.value) # sqrt(abs2(z)) 
+Base.abs2(z::Dual) = realpart(conj(z)*z)
 
 Base.real(z::Dual{<:Real}) = z
 Base.abs(z::Dual{<:Real}) = z ≥ 0 ? z : -z
