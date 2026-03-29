@@ -4,9 +4,21 @@ struct Dual{T<:ReComp} <: Number
     value::T
     epsilon::T
 end
+
+function Base.rand(rng::AbstractRNG, ::Random.SamplerType{Dual{T}}) where {T<:ReComp}
+    Dual{T}(rand(rng, T), rand(rng, T))
+end
+
+function Base.randn(rng::AbstractRNG, ::Type{Dual{T}}) where {T<:ReComp}
+    Dual{T}(
+        randn(rng, T) / 2,
+        randn(rng, T) / 2
+    )
+end
+
 Dual(x::S, y::T) where {S<:ReComp,T<:ReComp} = Dual(promote(x,y)...)
 Dual(x::ReComp) = Dual(x, zero(x))
-Dual{T}(x::ReComp) where T<:ReComp = Dual{T}(T(x), zero(T))
+Dual{T}(x::ReComp) where T<:ReComp = Dual{T}(T(x), zero(x))
 
 const ɛ = Dual(false, true)
 const imɛ = Dual(Complex(false, false), Complex(false, true))
@@ -152,7 +164,7 @@ function printtimes(io::IO, x::Real)
     end
 end
 
-Base.show(io::IO, z::Dual) = dual_show(io, z, get(IOContext(io), :compact, false))
+# Base.show(io::IO, z::Dual) = dual_show(io, z, get(IOContext(io), :compact, false))
 
 function Base.read(s::IO, ::Type{Dual{T}}) where T<:ReComp
     x = read(s, T)
@@ -181,6 +193,14 @@ Base.isequal(x::Number, z::Dual) = isequal(z, x)
 Base.isless(z::Dual{<:Real},w::Dual{<:Real}) = value(z) < value(w)
 Base.isless(z::Real,w::Dual{<:Real}) = z < value(w)
 Base.isless(z::Dual{<:Real},w::Real) = value(z) < w
+# Added
+Base.isless(x::Dual{T}, y::Dual{T}) where T =isless(norm(realpart(x)),norm(realpart(y)))
+function Base.sqrt(a::Dual{T}) where T
+	c=sqrt(a.value)
+	d=a.epsilon==0 ? a.epsilon : sylvester(c,c,-a.epsilon)
+	Dual(c,d)
+end
+Base.eps(::Dual{T}) where T=eps(T)
 
 Base.isinteger(z::Dual) = isinteger(value(z)) # Ignore epsilon part to be consistent with ==
 
@@ -202,8 +222,9 @@ for op in (:real, :imag, :conj, :float, :complex)
     @eval Base.$op(z::Dual) = Dual($op(value(z)), $op(epsilon(z)))
 end
 
-Base.abs(z::Dual) = sqrt(abs2(z))
-Base.abs2(z::Dual) = real(conj(z)*z)
+
+Base.abs(z::Dual) = z.value==0 ? Dual(0,abs(z.epsilon)) : abs(z.value) # sqrt(abs2(z)) 
+Base.abs2(z::Dual) = realpart(conj(z)*z)
 
 Base.real(z::Dual{<:Real}) = z
 Base.abs(z::Dual{<:Real}) = z ≥ 0 ? z : -z
@@ -242,16 +263,22 @@ Base.:-(z::Number, w::Dual) = Dual(z-value(w), -epsilon(w))
 Base.:-(z::Dual, w::Number) = Dual(value(z)-w, epsilon(z))
 
 # avoid ambiguous definition with Bool*Number
-Base.:*(x::Bool, z::Dual) = ifelse(x, z, ifelse(signbit(real(value(z)))==0, zero(z), -zero(z)))
-Base.:*(x::Dual, z::Bool) = z*x
+# Base.:*(x::Bool, z::Dual) = ifelse(x, z, ifelse(signbit(real(value(z)))==0, zero(z), -zero(z)))
+# Base.:*(x::Dual, z::Bool) = z*x
+Base.:*(x::Bool, z::Dual)=Dual(x*z.value,x*z.epsilon)
+Base.:*(z::Dual, x::Bool)=Dual(z.value*x,z.epsilon*x)
 
 Base.:*(z::Dual, w::Dual) = Dual(value(z)*value(w), epsilon(z)*value(w)+value(z)*epsilon(w))
 Base.:*(x::Number, z::Dual) = Dual(x*value(z), x*epsilon(z))
-Base.:*(z::Dual, x::Number) = Dual(x*value(z), x*epsilon(z))
+Base.:*(z::Dual, x::Number) = Dual(value(z)*x, epsilon(z)*x)
 
-Base.:/(z::Dual, w::Dual) = Dual(value(z)/value(w), (epsilon(z)*value(w)-value(z)*epsilon(w))/(value(w)*value(w)))
-Base.:/(z::Number, w::Dual) = Dual(z/value(w), -z*epsilon(w)/value(w)^2)
+Base.:/(z::Dual, w::Dual) = z*inv(w) # Dual(value(z)/value(w), (epsilon(z)*value(w)-value(z)*epsilon(w))/(value(w)*value(w)))
+Base.:/(z::Number, w::Dual) = z*inv(w) # Dual(z/value(w), -z*epsilon(w)/value(w)^2)
 Base.:/(z::Dual, x::Number) = Dual(value(z)/x, epsilon(z)/x)
+
+Base.:\(z::Dual, w::Dual) = inv(z)*w # Dual(value(z)/value(w), (epsilon(z)*value(w)-value(z)*epsilon(w))/(value(w)*value(w)))
+Base.:\(z::Number, w::Dual) = inv(z)*w # Dual(z/value(w), -z*epsilon(w)/value(w)^2)
+Base.:\(z::Dual, x::Number) = inv(z)*w # Dual(value(z)/x, epsilon(z)/x)
 
 for f in [:(Base.:^), :(NaNMath.pow)]
     @eval function ($f)(z::Dual{T1}, w::Dual{T2}) where {T1, T2}
@@ -289,7 +316,7 @@ end
 NaNMath.pow(z::Dual{T}, n::Number) where T = Dual(NaNMath.pow(value(z),n), epsilon(z)*n*NaNMath.pow(value(z),n-1))
 NaNMath.pow(z::Number, w::Dual{T}) where T = Dual(NaNMath.pow(z,value(w)), epsilon(w)*NaNMath.pow(z,value(w))*log(z))
 
-Base.inv(z::Dual) = dual(inv(value(z)),-epsilon(z)/value(z)^2)
+Base.inv(z::Dual) = dual(inv(value(z)),-value(z)\epsilon(z)/value(z))
 
 # force use of NaNMath functions in derivative calculations
 function to_nanmath(x::Expr)
