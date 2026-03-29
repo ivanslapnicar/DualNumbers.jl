@@ -216,7 +216,6 @@ Base.abs(z::Dual) = z.value==0 ? Dual(0,abs(z.epsilon)) : abs(z.value) # sqrt(ab
 Base.abs2(z::Dual) = realpart(conj(z)*z)
 
 Base.real(z::Dual{<:Real}) = z
-Base.abs(z::Dual{<:Real}) = z ≥ 0 ? z : -z
 
 Base.angle(z::Dual{<:Real}) = z ≥ 0 ? zero(z) : one(z)*π
 function Base.angle(z::Dual{Complex{T}}) where T<:Real
